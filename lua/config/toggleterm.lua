@@ -1,3 +1,3 @@
 require('toggleterm').setup{
-    shell = "fish"
+    shell = "zsh"
 }

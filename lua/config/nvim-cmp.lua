@@ -110,6 +110,7 @@ require'lspconfig'.jsonls.setup{
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, {buffer=0})
         vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, {buffer=0})
     end,
+    cmd = { "vscode-json-languageserver", "--stdio"},
 }
 
 require'lspconfig'.html.setup{
@@ -139,7 +140,7 @@ require'lspconfig'.hls.setup{
     end,
 }
 
-require'lspconfig'.sumneko_lua.setup{
+require'lspconfig'.lua_ls.setup{
     capabilities = capabilities,
     on_attach = function()
         vim.keymap.set("n", "K", vim.lsp.buf.hover, {buffer=0})

@@ -12,4 +12,5 @@ return {
     { 'nvim-neo-tree/neo-tree.nvim' },
     { 'BurntSushi/ripgrep' },
     { 'sharkdp/fd' },
+    { 'andweeb/presence.nvim' },
 }
