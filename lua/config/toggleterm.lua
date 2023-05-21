@@ -1,3 +1,6 @@
 require('toggleterm').setup{
-    shell = "zsh"
+    shell = "zsh",
+    float_opts = {
+        border = "curved"
+    }
 }

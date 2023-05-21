@@ -13,4 +13,6 @@ return {
     { 'BurntSushi/ripgrep' },
     { 'sharkdp/fd' },
     { 'andweeb/presence.nvim' },
+    { 'CRAG666/code_runner.nvim' },
+    { 'tpope/vim-fugitive' },
 }

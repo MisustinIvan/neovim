@@ -150,15 +150,30 @@ require'lspconfig'.lua_ls.setup{
 }
 -- Setup Completion
 -- See https://github.com/hrsh7th/nvim-cmp#basic-configuration
+local lspkind = require('lspkind')
 local cmp = require("cmp")
 cmp.setup({
   preselect = cmp.PreselectMode.None,
+
+  formatting = {
+    format = lspkind.cmp_format({
+      mode = 'symbol_text', -- show only symbol annotations
+    })
+  },
 
   snippet = {
     expand = function(args)
         require('luasnip').lsp_expand(args.body)
     end,
   },
+
+  window = {
+      documentation = cmp.config.window.bordered(),
+      completion = cmp.config.window.bordered({
+          winhighlight = 'Normal:CmpPmenu,CursorLine:PmenuSel,Search:None',
+      }),
+  },
+
 
   mapping = {
     ["<C-p>"] = cmp.mapping.select_prev_item(),

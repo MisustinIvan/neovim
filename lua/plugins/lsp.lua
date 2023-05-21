@@ -13,4 +13,5 @@ return {
     { 'mfussenegger/nvim-dap' },
     { 'mfussenegger/nvim-lint' },
     { 'mhartington/formatter.nvim' },
+    { 'onsails/lspkind.nvim' },
 }

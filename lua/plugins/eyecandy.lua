@@ -10,4 +10,6 @@ return {
     { 'akinsho/bufferline.nvim' },
     { 'j-hui/fidget.nvim' },
     { 'hrsh7th/cmp-emoji' },
+    { 'willothy/nvim-cokeline' },
+    { 'xiyaowong/transparent.nvim' },
 }
