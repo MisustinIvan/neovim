@@ -1,45 +1,37 @@
-
-	-- setup lazy --
-
-local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
-if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-    'git',
-    'clone',
-    '--filter=blob:none',
-    'https://github.com/folke/lazy.nvim.git',
-    '--branch=stable',
-    lazypath,
-  })
+-- bootstrap lazy
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable", -- latest stable release
+		lazypath,
+	})
 end
 vim.opt.rtp:prepend(lazypath)
 
-	-- set the mapleader because lazy wants it --
+require("config.settings")
+require("config.keybinds")
 
-vim.g.mapleader = " "
-
-    -- give the plugins to lazy --
-
-require('lazy').setup('plugins')
-
-    -- load up all of the config files --
-
-require('config.neo_tree')
-require('config.keymaps')
-require('config.colors')
-require('config.lualine')
---require('config.bufferline')
-require('config.cokeline')
-require('config.pairs')
-require('config.scope')
-require('config.toggleterm')
-require('config.treesitter')
-require('config.trouble')
-require('config.nvim-cmp')
-require('config.fidget')
-require('config.mason')
---require('config.lint')
-require('config.presence')
-require('config.code_runner')
-require('config.colorizer')
-require('config.transparent')
+require("lazy").setup({
+	--require("plugins.express_line"),
+	--require("plugins.which_key"),
+	require("plugins.treesitter"),
+	require("plugins.autopairs"),
+	require("plugins.colorschemes"),
+	require("plugins.nvim_tree"),
+	require("plugins.telescope"),
+	require("plugins.lualine"),
+	require("plugins.harpoon"),
+	require("plugins.code_runner"),
+	require("plugins.nvim_highlight_colors"),
+	require("plugins.lsp"),
+	require("plugins.trouble"),
+	require("plugins.conform"),
+	require("plugins.toggleterm"),
+	require("plugins.apm"),
+	require("plugins.presence"),
+	require("plugins.nwm"),
+})
