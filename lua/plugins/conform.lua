@@ -6,7 +6,8 @@ return {
 				lua = { "stylua" },
 				python = { "ruff" },
 				go = { "gofmt" },
-				rust = { "cargo clippy" },
+				rust = { "rustfmt" },
+				html = { "prettier" },
 			},
 		})
 	end,

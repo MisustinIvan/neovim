@@ -34,7 +34,21 @@ return {
 				})
 			end,
 		},
-		"L3MON4D3/LuaSnip",
+		{
+			"github/copilot.vim",
+			config = function()
+				vim.g.copilot_no_tab_map = true
+				vim.api.nvim_set_keymap(
+					"i",
+					"<C-J>",
+					'copilot#Accept("<CR>")',
+					{ silent = true, expr = true, desc = "accept copilot suggestion" }
+				)
+			end,
+		},
+		{
+			"L3MON4D3/LuaSnip",
+		},
 		"onsails/lspkind.nvim",
 	},
 	config = function()
@@ -45,12 +59,12 @@ return {
 		vim.opt.shortmess = vim.opt.shortmess + "c"
 
 		local function on_attach(client, buffer)
-			--			vim.api.nvim_set_keymap(
-			--				"n",
-			--				"K",
-			--				"<cmd>lua vim.lsp.buf.hover()<cr>",
-			--				{ noremap = true, silent = true, desc = "Hover" }
-			--			)
+			vim.api.nvim_set_keymap(
+				"n",
+				"K",
+				"<cmd>lua vim.lsp.buf.hover()<cr>",
+				{ noremap = true, silent = true, desc = "Hover" }
+			)
 			vim.api.nvim_set_keymap(
 				"n",
 				"<leader>gd",
@@ -68,6 +82,12 @@ return {
 				"<leader>do",
 				"<cmd>lua vim.diagnostic.open_float()<CR>",
 				{ noremap = true, silent = true, desc = "Show diagnostics" }
+			)
+			vim.api.nvim_set_keymap(
+				"n",
+				"<leader>ca",
+				"<cmd>lua vim.lsp.buf.code_action()<CR>",
+				{ noremap = true, silent = true, desc = "Code actions" }
 			)
 		end
 
@@ -91,13 +111,6 @@ return {
 
 		require("lspconfig").pyright.setup({
 			capabilities = capabilities,
-			settings = {
-				Lua = {
-					diagnostics = {
-						globals = { "vim" },
-					},
-				},
-			},
 			on_attach = on_attach,
 		})
 
@@ -106,15 +119,30 @@ return {
 			on_attach = on_attach,
 		})
 
+		require("lspconfig").rust_analyzer.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		require("lspconfig").tsserver.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		require("lspconfig").texlab.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
 		local cmp = require("cmp")
 
 		-- suggestions for searching in cmdline
-		cmp.setup.cmdline("/", {
-			mapping = cmp.mapping.preset.cmdline(),
-			sources = {
-				{ name = "buffer" },
-			},
-		})
+		-- cmp.setup.cmdline("/", {
+		-- 	mapping = cmp.mapping.preset.cmdline(),
+		-- 	sources = {
+		-- 		{ name = "buffer" },
+		-- 	},
+		-- })
 		-- suggestions for cmdline [EVALUATING]
 		--		cmp.setup.cmdline(":", {
 		--			mapping = cmp.mapping.preset.cmdline(),
@@ -147,6 +175,15 @@ return {
 				["<C-f>"] = cmp.mapping.scroll_docs(4),
 				["<C-Space>"] = cmp.mapping.complete(),
 				["<C-e>"] = cmp.mapping.close(),
+			},
+
+			window = {
+				completion = {
+					border = "rounded",
+				},
+				documentation = {
+					border = "rounded",
+				},
 			},
 
 			snippet = {

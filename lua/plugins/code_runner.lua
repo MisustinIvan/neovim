@@ -8,6 +8,9 @@ return {
 				go = "go run .",
 				rust = "cargo run",
 			},
+			float = {
+				border = "rounded",
+			},
 		})
 	end,
 	keys = {

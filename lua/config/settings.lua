@@ -19,3 +19,4 @@ vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣", eol = "󱞥" }
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 vim.o.scrolloff = 5
+vim.o.shell = "/bin/fish"

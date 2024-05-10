@@ -14,6 +14,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("config.settings")
 require("config.keybinds")
+require("config.latex")
 
 require("lazy").setup({
 	--require("plugins.express_line"),

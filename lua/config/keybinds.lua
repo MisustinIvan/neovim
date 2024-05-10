@@ -28,3 +28,8 @@ vim.api.nvim_set_keymap("n", "<leader>a", "<cmd>vnew<cr>", { desc = "split verti
 
 vim.api.nvim_set_keymap("n", "<leader>dd", "<cmd>bd<cr>", { desc = "kill window" })
 vim.api.nvim_set_keymap("n", "<leader>DD", "<cmd>bd!<cr>", { desc = "kill window" })
+
+vim.api.nvim_set_keymap("n", "<leader>tN", "<cmd>tabnew<cr>", { desc = "create tab" })
+vim.api.nvim_set_keymap("n", "<leader>tC", "<cmd>tabclose<cr>", { desc = "delete tab" })
+vim.api.nvim_set_keymap("n", "<leader>tn", "<cmd>tabnext<cr>", { desc = "next tab" })
+vim.api.nvim_set_keymap("n", "<leader>tp", "<cmd>tabprevious<cr>", { desc = "prev tab" })
