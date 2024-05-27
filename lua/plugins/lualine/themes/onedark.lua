@@ -170,7 +170,7 @@ return function()
 	})
 
 	ins_right({
-		require("plugins.local.music_info").music_info,
+		require("music_info").music_info,
 		color = {
 			fg = colors.red,
 		},
@@ -194,7 +194,7 @@ return function()
 	})
 
 	ins_right({
-		require("plugins.lualine_after.lsp_info"),
+		require("plugins.lualine.utils.lsp_info"),
 		color = { fg = colors.purple, gui = "bold" },
 	})
 

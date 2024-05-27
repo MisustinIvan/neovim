@@ -17,13 +17,6 @@ require("config.keybinds")
 require("config.latex")
 
 require("lazy").setup({
-	{
-		"MisustinIvan/music_info",
-		config = function()
-			require("music_info").setup({ "playerctl" })
-		end,
-		cmd = { "MusicInfo" },
-	},
 	--require("plugins.express_line"),
 	--require("plugins.which_key"),
 	require("plugins.treesitter"),
@@ -43,4 +36,7 @@ require("lazy").setup({
 	require("plugins.presence"),
 	require("plugins.nwm"),
 	require("plugins.gitsigns"),
+	require("plugins.colorsync"),
+	require("plugins.music_info"),
+	--require("plugins.markdown"),
 })
