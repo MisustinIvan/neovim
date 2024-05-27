@@ -16,6 +16,7 @@ vim.opt.clipboard = "unnamedplus"
 vim.opt.laststatus = 3
 vim.opt.list = true
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣", eol = "󱞥" }
+vim.opt.mouse = ""
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 vim.o.scrolloff = 5

@@ -8,6 +8,8 @@ return {
 				go = { "gofmt" },
 				rust = { "rustfmt" },
 				html = { "prettier" },
+				javascript = { "prettier" },
+				json = { "prettier" },
 			},
 		})
 	end,

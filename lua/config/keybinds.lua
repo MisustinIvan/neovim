@@ -33,3 +33,5 @@ vim.api.nvim_set_keymap("n", "<leader>tN", "<cmd>tabnew<cr>", { desc = "create t
 vim.api.nvim_set_keymap("n", "<leader>tC", "<cmd>tabclose<cr>", { desc = "delete tab" })
 vim.api.nvim_set_keymap("n", "<leader>tn", "<cmd>tabnext<cr>", { desc = "next tab" })
 vim.api.nvim_set_keymap("n", "<leader>tp", "<cmd>tabprevious<cr>", { desc = "prev tab" })
+
+vim.api.nvim_set_keymap("n", "<leader>nt", "<cmd>terminal<cr>", { desc = "open terminal" })

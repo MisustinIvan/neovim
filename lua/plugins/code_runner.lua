@@ -4,7 +4,7 @@ return {
 		require("code_runner").setup({
 			mode = "float",
 			filetype = {
-				--python = "python3",
+				python = "python3",
 				go = "go run .",
 				rust = "cargo run",
 			},
