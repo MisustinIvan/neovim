@@ -170,10 +170,10 @@ return function()
 	})
 
 	ins_left({
-		"filename",
-		--		function()
-		--			return vim.api.nvim_buf_get_name(0)
-		--		end,
+		--"filename",
+		function()
+			return vim.api.nvim_buf_get_name(0)
+		end,
 		color = {
 			fg = colors.green,
 		},

@@ -39,9 +39,18 @@ return {
 				end,
 			},
 		})
-	end,
 
-	keys = {
-		{ "<leader>th", "<cmd>ToggleTerm<cr>" },
-	},
+		vim.api.nvim_set_keymap(
+			"n",
+			"<leader>th",
+			"<cmd>ToggleTerm direction=horizontal<cr>",
+			{ noremap = true, silent = true }
+		)
+		vim.api.nvim_set_keymap(
+			"n",
+			"<leader>tf",
+			"<cmd>ToggleTerm direction=float<cr>",
+			{ noremap = true, silent = true }
+		)
+	end,
 }
