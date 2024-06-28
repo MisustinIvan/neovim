@@ -144,6 +144,11 @@ return {
 			on_attach = on_attach,
 		})
 
+		require("lspconfig").jdtls.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
 		local cmp = require("cmp")
 
 		-- suggestions for searching in cmdline

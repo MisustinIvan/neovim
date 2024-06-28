@@ -38,5 +38,6 @@ require("lazy").setup({
 	require("plugins.gitsigns"),
 	require("plugins.colorsync"),
 	require("plugins.music_info"),
-	--require("plugins.markdown"),
+	require("plugins.markdown"),
+	require("plugins.dap"),
 })

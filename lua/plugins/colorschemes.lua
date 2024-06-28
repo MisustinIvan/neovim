@@ -9,13 +9,17 @@ return {
 	},
 	{
 		"catppuccin/nvim",
+		priority = 1000,
+		--init = function()
+		--	vim.cmd("colorscheme catppuccin-frappe")
+		--end,
 	},
 	{
 		"blazkowolf/gruber-darker.nvim",
 		priority = 1000,
-		init = function()
-			vim.cmd("colorscheme gruber-darker")
-		end,
+		--init = function()
+		--	vim.cmd("colorscheme gruber-darker")
+		--end,
 		opts = {
 			bold = true,
 			invert = {
@@ -32,5 +36,12 @@ return {
 			undercurl = true,
 			underline = true,
 		},
+	},
+	{
+		"rebelot/kanagawa.nvim",
+		priority = 1000,
+		init = function()
+			vim.cmd("colorscheme kanagawa")
+		end,
 	},
 }
