@@ -18,6 +18,10 @@ vim.opt.list = true
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣", eol = "󱞥" }
 vim.opt.mouse = ""
 vim.o.tabstop = 4
+-- use spaces
+vim.o.expandtab = true
 vim.o.shiftwidth = 4
 vim.o.scrolloff = 5
+vim.o.splitbelow = true
+vim.o.splitright = true
 vim.o.shell = "/bin/fish"

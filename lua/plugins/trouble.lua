@@ -7,6 +7,6 @@ return {
 		require("trouble").setup({})
 	end,
 	keys = {
-		{ "<leader>ds", "<cmd>TroubleToggle<cr>", { desc = "Toggle trouble" } },
+		{ "<leader>ds", "<cmd>Trouble diagnostics<cr>", { desc = "Toggle diagnostics" } },
 	},
 }

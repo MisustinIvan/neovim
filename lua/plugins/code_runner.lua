@@ -7,6 +7,9 @@ return {
 				python = "python3",
 				go = "go run .",
 				rust = "cargo run",
+				c = "make build run",
+				haskell = "ghc main.hs && ./main",
+                elixir = "mix run"
 			},
 			float = {
 				border = "rounded",

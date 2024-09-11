@@ -34,18 +34,18 @@ return {
 				})
 			end,
 		},
-		{
-			"github/copilot.vim",
-			config = function()
-				vim.g.copilot_no_tab_map = true
-				vim.api.nvim_set_keymap(
-					"i",
-					"<C-J>",
-					'copilot#Accept("<CR>")',
-					{ silent = true, expr = true, desc = "accept copilot suggestion" }
-				)
-			end,
-		},
+		--{
+		--	"github/copilot.vim",
+		--	config = function()
+		--		vim.g.copilot_no_tab_map = true
+		--		vim.api.nvim_set_keymap(
+		--			"i",
+		--			"<C-J>",
+		--			'copilot#Accept("<CR>")',
+		--			{ silent = true, expr = true, desc = "accept copilot suggestion" }
+		--		)
+		--	end,
+		--},
 		{
 			"L3MON4D3/LuaSnip",
 		},
@@ -101,8 +101,24 @@ return {
 			capabilities = capabilities,
 			settings = {
 				Lua = {
+					workspace = {
+						library = vim.tbl_deep_extend("force", vim.api.nvim_get_runtime_file("", true), {
+							"${3rd}/luv/library",
+							"${3rd}/busted/library",
+							"/usr/share/awesome/lib",
+							"/usr/share/lua",
+						}),
+					},
 					diagnostics = {
-						globals = { "vim" },
+						globals = {
+							"vim",
+							"awesome",
+							"awful",
+							"client",
+							"screen",
+							"tag",
+							"root",
+						},
 					},
 				},
 			},
@@ -115,6 +131,16 @@ return {
 		})
 
 		require("lspconfig").gopls.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		require("lspconfig").hls.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		require("lspconfig").elixirls.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
@@ -145,6 +171,11 @@ return {
 		})
 
 		require("lspconfig").jdtls.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		require("lspconfig").ols.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
@@ -225,7 +256,7 @@ return {
 				{ name = "path" },
 				--{ name = "buffer" },
 				--{ name = "emoji" },
-				--{ name = "neorg" },
+				{ name = "neorg" },
 				{ name = "nvim_lsp_signature_help" },
 				--{ name = "cmp_buffer" },
 				{ name = "calc" },

@@ -10,6 +10,7 @@ return {
 				html = { "prettier" },
 				javascript = { "prettier" },
 				json = { "prettier" },
+                haskell = {"ormolu"},
 			},
 		})
 	end,

@@ -2,10 +2,10 @@ return {
 	{
 		"olimorris/onedarkpro.nvim",
 		priority = 1000,
-		--init = function()
-		--	vim.cmd("colorscheme onedark_vivid")
+		init = function()
+			vim.cmd("colorscheme onedark_vivid")
 		--	--vim.cmd("colorscheme onedark_dark")
-		--end,
+		end,
 	},
 	{
 		"catppuccin/nvim",
@@ -40,8 +40,21 @@ return {
 	{
 		"rebelot/kanagawa.nvim",
 		priority = 1000,
-		init = function()
-			vim.cmd("colorscheme kanagawa")
-		end,
+		--init = function()
+		--	vim.cmd("colorscheme kanagawa")
+		--end,
+	},
+	{
+		"0xstepit/flow.nvim",
+		lazy = false,
+		priority = 1000,
+	},
+	{
+		"nyoom-engineering/oxocarbon.nvim",
+		lazy = false,
+		priority = 1000,
+		--init = function()
+		--	vim.cmd("colorscheme oxocarbon")
+		--end
 	},
 }
