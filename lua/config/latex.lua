@@ -1,5 +1,6 @@
 local function compile_latex()
-	vim.cmd("silent !pdflatex %")
+    path = vim.api.nvim_buf_get_name(0)
+	vim.cmd("silent !pdflatex " .. path)
 end
 
 vim.api.nvim_create_autocmd("BufWritePost", {
