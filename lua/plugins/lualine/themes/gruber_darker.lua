@@ -183,12 +183,12 @@ return function()
 		"%=",
 	})
 
-	ins_right({
-		require("music_info").music_info,
-		color = {
-			fg = colors.red,
-		},
-	})
+	--ins_right({
+	--	require("music_info").music_info,
+	--	color = {
+	--		fg = colors.red,
+	--	},
+	--})
 
 	ins_right({
 		"branch",

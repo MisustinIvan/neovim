@@ -25,7 +25,7 @@ return {
 	"akinsho/toggleterm.nvim",
 	config = function()
 		require("toggleterm").setup({
-			shell = "fish",
+			shell = "powershell.exe",
 			size = 8,
 			shade_terminals = true,
 			float_opts = {
@@ -52,5 +52,13 @@ return {
 			"<cmd>ToggleTerm direction=float<cr>",
 			{ noremap = true, silent = true }
 		)
+        local Terminal = require("toggleterm.terminal").Terminal
+        local lazygit = Terminal:new({cmd = "lazygit", hidden = true, direction = "float"})
+
+        function _lazygit_toggle()
+            lazygit:toggle()
+        end
+
+        vim.api.nvim_set_keymap("n", "<leader>tg", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
 	end,
 }

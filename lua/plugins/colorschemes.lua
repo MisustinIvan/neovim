@@ -2,10 +2,10 @@ return {
 	{
 		"olimorris/onedarkpro.nvim",
 		priority = 1000,
-		init = function()
-			vim.cmd("colorscheme onedark_vivid")
-		--	--vim.cmd("colorscheme onedark_dark")
-		end,
+		--init = function()
+			--vim.cmd("colorscheme onedark_vivid")
+			--vim.cmd("colorscheme onedark_dark")
+		--end,
 	},
 	{
 		"catppuccin/nvim",
@@ -17,9 +17,9 @@ return {
 	{
 		"blazkowolf/gruber-darker.nvim",
 		priority = 1000,
-		--init = function()
-		--	vim.cmd("colorscheme gruber-darker")
-		--end,
+		init = function()
+			vim.cmd("colorscheme gruber-darker")
+		end,
 		opts = {
 			bold = true,
 			invert = {
