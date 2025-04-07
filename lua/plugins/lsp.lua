@@ -1,7 +1,6 @@
 return {
 	"hrsh7th/nvim-cmp",
 	dependencies = {
-		"hrsh7th/cmp-cmdline",
 		"hrsh7th/cmp-path",
 		"hrsh7th/cmp-buffer",
 		"hrsh7th/cmp-calc",
@@ -19,33 +18,35 @@ return {
 				require("neodev").setup()
 			end,
 		},
-		{
-			"williamboman/mason.nvim",
-			config = function()
-				require("mason").setup()
-			end,
-		},
 
 		{
 			"williamboman/mason-lspconfig.nvim",
+			dependencies = {
+				{
+					"williamboman/mason.nvim",
+					config = function()
+						require("mason").setup()
+					end,
+				},
+			},
 			config = function()
 				require("mason-lspconfig").setup({
 					ensure_installed = { "lua_ls" },
 				})
 			end,
 		},
-		--{
-		--	"github/copilot.vim",
-		--	config = function()
-		--		vim.g.copilot_no_tab_map = true
-		--		vim.api.nvim_set_keymap(
-		--			"i",
-		--			"<C-J>",
-		--			'copilot#Accept("<CR>")',
-		--			{ silent = true, expr = true, desc = "accept copilot suggestion" }
-		--		)
-		--	end,
-		--},
+		{
+			"github/copilot.vim",
+			config = function()
+				vim.g.copilot_no_tab_map = true
+				vim.api.nvim_set_keymap(
+					"i",
+					"<C-J>",
+					'copilot#Accept("<CR>")',
+					{ silent = true, expr = true, desc = "accept copilot suggestion" }
+				)
+			end,
+		},
 		{
 			"L3MON4D3/LuaSnip",
 		},
@@ -59,6 +60,12 @@ return {
 		vim.opt.shortmess = vim.opt.shortmess + "c"
 
 		local function on_attach(client, buffer)
+			vim.api.nvim_set_keymap(
+				"i",
+				"<c-k>",
+				"<cmd>lua vim.lsp.buf.signature_help()<cr>",
+				{ noremap = true, silent = true, desc = "Hover" }
+			)
 			vim.api.nvim_set_keymap(
 				"n",
 				"K",
@@ -97,7 +104,9 @@ return {
 			vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 		end
 
-		require("lspconfig").lua_ls.setup({
+		local lspconfig = require("lspconfig")
+
+		lspconfig.lua_ls.setup({
 			capabilities = capabilities,
 			settings = {
 				Lua = {
@@ -125,94 +134,69 @@ return {
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").omnisharp.setup({
+		lspconfig.omnisharp.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").pyright.setup({
+		lspconfig.gopls.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").gopls.setup({
+		lspconfig.ocamllsp.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").zls.setup({
+		lspconfig.zls.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").hls.setup({
+		lspconfig.hls.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").elixirls.setup({
+		lspconfig.elixirls.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").rust_analyzer.setup({
+		lspconfig.rust_analyzer.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").ts_ls.setup({
+		lspconfig.denols.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").texlab.setup({
+		lspconfig.texlab.setup({})
+
+		lspconfig.clangd.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").clangd.setup({
+		lspconfig.jdtls.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").bashls.setup({
+		lspconfig.html.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
-		require("lspconfig").jdtls.setup({
-			capabilities = capabilities,
-			on_attach = on_attach,
-		})
-
-		require("lspconfig").ols.setup({
+		lspconfig.ols.setup({
 			capabilities = capabilities,
 			on_attach = on_attach,
 		})
 
 		local cmp = require("cmp")
-
-		-- suggestions for searching in cmdline
-		-- cmp.setup.cmdline("/", {
-		-- 	mapping = cmp.mapping.preset.cmdline(),
-		-- 	sources = {
-		-- 		{ name = "buffer" },
-		-- 	},
-		-- })
-		-- suggestions for cmdline [EVALUATING]
-		--		cmp.setup.cmdline(":", {
-		--			mapping = cmp.mapping.preset.cmdline(),
-		--			sources = cmp.config.sources({
-		--				{ name = "path" },
-		--			}, {
-		--				{
-		--					name = "cmdline",
-		--					option = {
-		--						ignore_cmds = { "Man", "!" },
-		--					},
-		--				},
-		--			}),
-		--		})
 
 		cmp.setup({
 			mapping = {
@@ -264,13 +248,56 @@ return {
 				{ name = "nvim_lsp" },
 				{ name = "luasnip" },
 				{ name = "path" },
-				--{ name = "buffer" },
-				--{ name = "emoji" },
-				{ name = "neorg" },
 				{ name = "nvim_lsp_signature_help" },
-				--{ name = "cmp_buffer" },
 				{ name = "calc" },
 			},
 		})
 	end,
 }
+
+--return {
+--	"neovim/nvim-lspconfig",
+--	version = "*",
+--	dependencies = {
+--		"saghen/blink.cmp",
+--		{
+--			"williamboman/mason.nvim",
+--			config = function()
+--				require("mason").setup()
+--			end,
+--		},
+--		{
+--			"j-hui/fidget.nvim",
+--			config = function()
+--				require("fidget").setup({})
+--			end,
+--		},
+--		{
+--			"folke/neodev.nvim",
+--			config = function()
+--				require("neodev").setup()
+--			end,
+--		},
+--		{
+--			"github/copilot.vim",
+--			config = function()
+--				vim.g.copilot_no_tab_map = true
+--				vim.api.nvim_set_keymap(
+--					"i",
+--					"<C-J>",
+--					'copilot#Accept("<CR>")',
+--					{ silent = true, expr = true, desc = "accept copilot suggestion" }
+--				)
+--			end,
+--		},
+--	},
+--	config = function()
+--		local capabilities = require("blink.cmp").get_lsp_capabilities()
+--		local lspconfig = require("lspconfig")
+--
+--		lspconfig.lua_ls.setup({ capabilities = capabilities })
+--		lspconfig.gopls.setup({ capabilities = capabilities })
+--
+--		require("blink.cmp").setup({ signature = { enabled = true } })
+--	end,
+--}

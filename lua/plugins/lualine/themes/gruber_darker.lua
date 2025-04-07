@@ -172,7 +172,13 @@ return function()
 	ins_left({
 		--"filename",
 		function()
-			return vim.api.nvim_buf_get_name(0)
+            local buf = vim.api.nvim_get_current_buf()
+            local is_modified = vim.api.nvim_buf_get_option(buf, 'modified')
+            local status = ""
+            if is_modified then
+                status = "[+] "
+            end
+			return status .. vim.api.nvim_buf_get_name(0)
 		end,
 		color = {
 			fg = colors.green,

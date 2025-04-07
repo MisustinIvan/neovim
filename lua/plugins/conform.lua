@@ -8,9 +8,11 @@ return {
 				go = { "gofmt" },
 				rust = { "rustfmt" },
 				html = { "prettier" },
-				javascript = { "prettier" },
+				javascript = { "deno_fmt" },
+				typescript = { "deno_fmt" },
 				json = { "prettier" },
-                haskell = {"ormolu"},
+				haskell = { "ormolu" },
+				ocaml = { "ocamlformat" },
 			},
 		})
 	end,

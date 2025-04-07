@@ -20,6 +20,13 @@ local function set_term_visuals()
 	vim.wo.wrap = false
 end
 vim.api.nvim_create_autocmd("TermEnter", { callback = set_term_visuals })
+local function unset_term_visuals()
+	vim.wo.number = true
+	vim.wo.relativenumber = true
+	vim.wo.cursorline = true
+	vim.wo.wrap = false
+end
+vim.api.nvim_create_autocmd("TermLeave", { callback = unset_term_visuals })
 
 return {
 	"akinsho/toggleterm.nvim",
@@ -52,13 +59,13 @@ return {
 			"<cmd>ToggleTerm direction=float<cr>",
 			{ noremap = true, silent = true }
 		)
-        local Terminal = require("toggleterm.terminal").Terminal
-        local lazygit = Terminal:new({cmd = "lazygit", hidden = true, direction = "float"})
+		local Terminal = require("toggleterm.terminal").Terminal
+		local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
 
-        function _lazygit_toggle()
-            lazygit:toggle()
-        end
+		function _lazygit_toggle()
+			lazygit:toggle()
+		end
 
-        vim.api.nvim_set_keymap("n", "<leader>tg", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
+		vim.api.nvim_set_keymap("n", "<leader>tg", "<cmd>lua _lazygit_toggle()<CR>", { noremap = true, silent = true })
 	end,
 }

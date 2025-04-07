@@ -3,8 +3,8 @@ return {
 		"olimorris/onedarkpro.nvim",
 		priority = 1000,
 		--init = function()
-			--vim.cmd("colorscheme onedark_vivid")
-			--vim.cmd("colorscheme onedark_dark")
+		--vim.cmd("colorscheme onedark_vivid")
+		--vim.cmd("colorscheme onedark_dark")
 		--end,
 	},
 	{
@@ -17,9 +17,9 @@ return {
 	{
 		"blazkowolf/gruber-darker.nvim",
 		priority = 1000,
-		init = function()
-			vim.cmd("colorscheme gruber-darker")
-		end,
+		--init = function()
+		--	vim.cmd("colorscheme gruber-darker")
+		--end,
 		opts = {
 			bold = true,
 			invert = {
@@ -40,9 +40,9 @@ return {
 	{
 		"rebelot/kanagawa.nvim",
 		priority = 1000,
-		--init = function()
-		--	vim.cmd("colorscheme kanagawa")
-		--end,
+		init = function()
+			vim.cmd("colorscheme kanagawa")
+		end,
 	},
 	{
 		"0xstepit/flow.nvim",
@@ -56,5 +56,15 @@ return {
 		--init = function()
 		--	vim.cmd("colorscheme oxocarbon")
 		--end
+	},
+	{
+		"tiagovla/tokyodark.nvim",
+		lazy = false,
+		priority = 1000,
+	},
+	{
+		"niyabits/calvera-dark.nvim",
+		lazy = false,
+		priority = 1000,
 	},
 }
