@@ -32,7 +32,7 @@ return {
 	"akinsho/toggleterm.nvim",
 	config = function()
 		require("toggleterm").setup({
-			shell = "powershell.exe",
+			shell = "fish",
 			size = 8,
 			shade_terminals = true,
 			float_opts = {

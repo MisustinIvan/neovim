@@ -24,4 +24,4 @@ vim.o.shiftwidth = 4
 vim.o.scrolloff = 5
 vim.o.splitbelow = true
 vim.o.splitright = true
-vim.o.shell = "powershell"
+vim.o.shell = "fish"
