@@ -40,10 +40,22 @@ return {
 	{
 		"rebelot/kanagawa.nvim",
 		priority = 1000,
-		init = function()
-			vim.cmd("colorscheme kanagawa")
-		end,
+		--init = function()
+		--	vim.cmd("colorscheme kanagawa")
+		--end,
 	},
+    -- Using lazy.nvim
+    {
+      'ribru17/bamboo.nvim',
+      lazy = false,
+      priority = 1000,
+      config = function()
+        --require('bamboo').setup {
+        --  -- optional configuration here
+        --}
+        --require('bamboo').load()
+      end,
+    },
 	{
 		"0xstepit/flow.nvim",
 		lazy = false,
