@@ -1,6 +1,7 @@
 return {
 	"hrsh7th/nvim-cmp",
 	dependencies = {
+        "hrsh7th/cmp-emoji",
 		"hrsh7th/cmp-path",
 		"hrsh7th/cmp-buffer",
 		"hrsh7th/cmp-calc",
@@ -35,26 +36,26 @@ return {
 				})
 			end,
 		},
-        {
-            "MattiasMTS/cmp-dbee",
-            dependencies = {
-                {"kndndrj/nvim-dbee"}
-            },
-            ft = "sql", -- optional but good to have
-            opts = {}, -- needed
-        },
-		{
-			--"github/copilot.vim",
-			--config = function()
-			--	vim.g.copilot_no_tab_map = true
-			--	vim.api.nvim_set_keymap(
-			--		"i",
-			--		"<C-J>",
-			--		'copilot#Accept("<CR>")',
-			--		{ silent = true, expr = true, desc = "accept copilot suggestion" }
-			--	)
-			--end,
-		},
+        --{
+        --    "MattiasMTS/cmp-dbee",
+        --    dependencies = {
+        --        {"kndndrj/nvim-dbee"}
+        --    },
+        --    ft = "sql", -- optional but good to have
+        --    opts = {}, -- needed
+        --},
+		--{
+		--	"github/copilot.vim",
+		--	config = function()
+		--		vim.g.copilot_no_tab_map = true
+		--		vim.api.nvim_set_keymap(
+		--			"i",
+		--			"<C-J>",
+		--			'copilot#Accept("<CR>")',
+		--			{ silent = true, expr = true, desc = "accept copilot suggestion" }
+		--		)
+		--	end,
+		--},
 		{
 			"L3MON4D3/LuaSnip",
 		},
@@ -209,6 +210,22 @@ return {
 			on_attach = on_attach,
 		})
 
+		lspconfig.arduino_language_server.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		lspconfig.erlangls.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+		lspconfig.htmx.setup({
+			capabilities = capabilities,
+			on_attach = on_attach,
+		})
+
+
 		local cmp = require("cmp")
 
 		cmp.setup({
@@ -263,7 +280,7 @@ return {
 				{ name = "path" },
 				{ name = "nvim_lsp_signature_help" },
 				{ name = "calc" },
-                { name = "cmp-dbee"},
+                { name = "emoji"},
 			},
 		})
 	end,
