@@ -33,5 +33,7 @@ vim.api.nvim_set_keymap("n", "<leader>tN", "<cmd>tabnew<cr>", { desc = "create t
 vim.api.nvim_set_keymap("n", "<leader>tC", "<cmd>tabclose<cr>", { desc = "delete tab" })
 vim.api.nvim_set_keymap("n", "<leader>tn", "<cmd>tabnext<cr>", { desc = "next tab" })
 vim.api.nvim_set_keymap("n", "<leader>tp", "<cmd>tabprevious<cr>", { desc = "prev tab" })
+vim.api.nvim_set_keymap("n", "<leader>t<", "<cmd>tabm -1<cr>", { desc = "move tab left" })
+vim.api.nvim_set_keymap("n", "<leader>t>", "<cmd>tabm +1<cr>", { desc = "move tab right" })
 
 vim.api.nvim_set_keymap("n", "<leader>nt", "<cmd>terminal<cr>", { desc = "open terminal" })
