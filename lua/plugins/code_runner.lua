@@ -9,7 +9,8 @@ return {
 				rust = "cargo run",
 				c = "make build run",
 				haskell = "ghc main.hs && ./main",
-                elixir = "mix run"
+                elixir = "mix run",
+                odin = "odin run ."
 			},
 			float = {
 				border = "rounded",
