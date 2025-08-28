@@ -51,7 +51,7 @@ require("lazy").setup({
 	--require("plugins.neorg"),
 	require("plugins.oil"),
 	require("plugins.zen_mode"),
-    require("plugins.transparent")
+    --require("plugins.transparent")
 })
 
 vim.opt.termguicolors = true
