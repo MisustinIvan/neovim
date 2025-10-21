@@ -35,12 +35,12 @@ local function mode()
 	-- these colors are taken from the gruber-darker color scheme
 	local bg = colors.bg
 
-	vim.api.nvim_set_hl(0, 'StatusLineNormal',  { fg = colors.normal, bold = true })
-	vim.api.nvim_set_hl(0, 'StatusLineInsert',  { fg = colors.insert, bold = true })
-	vim.api.nvim_set_hl(0, 'StatusLineVisual',  { fg = colors.visual, bold = true })
+	vim.api.nvim_set_hl(0, 'StatusLineNormal', { fg = colors.normal, bold = true })
+	vim.api.nvim_set_hl(0, 'StatusLineInsert', { fg = colors.insert, bold = true })
+	vim.api.nvim_set_hl(0, 'StatusLineVisual', { fg = colors.visual, bold = true })
 	vim.api.nvim_set_hl(0, 'StatusLineCommand', { fg = colors.command, bold = true })
 	vim.api.nvim_set_hl(0, 'StatusLineReplace', { fg = colors.replace, bold = true })
-	vim.api.nvim_set_hl(0, 'StatusLineSelect',{ fg = colors.select, bold = true })
+	vim.api.nvim_set_hl(0, 'StatusLineSelect', { fg = colors.select, bold = true })
 
 
 	local mode_to_str = {
@@ -84,53 +84,53 @@ local function mode()
 
 	local mode_color = {
 		-- normal modes
-		n =   'StatusLineNormal',
+		n = 'StatusLineNormal',
 		niI = 'StatusLineNormal',
 		niR = 'StatusLineNormal',
 		niV = 'StatusLineNormal',
-		nt =  'StatusLineNormal',
+		nt = 'StatusLineNormal',
 		ntT = 'StatusLineNormal',
 
 		-- operator pending variants
-		no =        'StatusLineNormal',
-		nov =       'StatusLineNormal',
-		noV =       'StatusLineNormal',
+		no = 'StatusLineNormal',
+		nov = 'StatusLineNormal',
+		noV = 'StatusLineNormal',
 		['no\22'] = 'StatusLineNormal',
 
 		-- visual modes
-		v =        'StatusLineVisual',
-		vs =       'StatusLineVisual',
-		V =        'StatusLineVisual',
-		Vs =       'StatusLineVisual',
-		['\22'] =  'StatusLineVisual',
+		v = 'StatusLineVisual',
+		vs = 'StatusLineVisual',
+		V = 'StatusLineVisual',
+		Vs = 'StatusLineVisual',
+		['\22'] = 'StatusLineVisual',
 		['\22s'] = 'StatusLineVisual',
 
 		-- select modes
-		s =       'StatusLineSelect',
-		S =       'StatusLineSelect',
+		s = 'StatusLineSelect',
+		S = 'StatusLineSelect',
 		['\19'] = 'StatusLineSelect',
 
 		-- all sorts of insert modes
-		i =  'StatusLineInsert',
+		i = 'StatusLineInsert',
 		ic = 'StatusLineInsert',
 		ix = 'StatusLineInsert',
 
 		-- all sorts of replace modes
-		R =   'StatusLineReplace',
-		Rc =  'StatusLineReplace',
-		Rx =  'StatusLineReplace',
-		Rv =  'StatusLineReplace',
+		R = 'StatusLineReplace',
+		Rc = 'StatusLineReplace',
+		Rx = 'StatusLineReplace',
+		Rv = 'StatusLineReplace',
 		Rvc = 'StatusLineReplace',
 		Rvx = 'StatusLineReplace',
 
 		-- command line(Ex mode)
-		c =   'StatusLineCommand',
-		cv =  'StatusLineCommand',
+		c = 'StatusLineCommand',
+		cv = 'StatusLineCommand',
 		cvr = 'StatusLineCommand',
 
 		-- confirm
-		r =      'StatusLineCommand',
-		rm =     'StatusLineCommand',
+		r = 'StatusLineCommand',
+		rm = 'StatusLineCommand',
 		['r?'] = 'StatusLineCommand',
 
 		-- shell
@@ -164,62 +164,99 @@ local function filetype_icon()
 end
 
 local function lsp_status()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local clients = vim.lsp.get_clients({ bufnr = bufnr })
-  if #clients == 0 then
-    return ''
-  end
-  local names = {}
-  for _, c in ipairs(clients) do
-    table.insert(names, c.name)
-  end
-  return '[' .. table.concat(names, ',') .. ']'
+	local bufnr = vim.api.nvim_get_current_buf()
+	local clients = vim.lsp.get_clients({ bufnr = bufnr })
+	if #clients == 0 then
+		return ''
+	end
+	local names = {}
+	for _, c in ipairs(clients) do
+		table.insert(names, c.name)
+	end
+	return '[' .. table.concat(names, ',') .. ']'
 end
 
 local function git_branch()
-  return vim.b.gitsigns_head and ('[' .. vim.b.gitsigns_head .. ']') or ''
+	return vim.b.gitsigns_head and ('[' .. vim.b.gitsigns_head .. ']') or ''
 end
 
 local function lsp_diagnostics()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local diagnostics = vim.diagnostic.get(bufnr)
+	local bufnr = vim.api.nvim_get_current_buf()
+	local diagnostics = vim.diagnostic.get(bufnr)
 
-  local counts = { E = 0, W = 0, I = 0, H = 0 }
-  for _, d in ipairs(diagnostics) do
-    if d.severity == vim.diagnostic.severity.ERROR then
-      counts.E = counts.E + 1
-    elseif d.severity == vim.diagnostic.severity.WARN then
-      counts.W = counts.W + 1
-    elseif d.severity == vim.diagnostic.severity.INFO then
-      counts.I = counts.I + 1
-    elseif d.severity == vim.diagnostic.severity.HINT then
-      counts.H = counts.H + 1
-    end
-  end
+	local counts = { E = 0, W = 0, I = 0, H = 0 }
+	for _, d in ipairs(diagnostics) do
+		if d.severity == vim.diagnostic.severity.ERROR then
+			counts.E = counts.E + 1
+		elseif d.severity == vim.diagnostic.severity.WARN then
+			counts.W = counts.W + 1
+		elseif d.severity == vim.diagnostic.severity.INFO then
+			counts.I = counts.I + 1
+		elseif d.severity == vim.diagnostic.severity.HINT then
+			counts.H = counts.H + 1
+		end
+	end
 
-  local result = {}
-  if counts.E > 0 then table.insert(result, '%#StatusLineNormal#'  .. icons.diagnostics.ERROR .. ' ' .. counts.E .. '%* ') end
-  if counts.W > 0 then table.insert(result, '%#StatusLineVisual#'  .. icons.diagnostics.WARN .. ' ' .. counts.W .. '%* ') end
-  if counts.I > 0 then table.insert(result, '%#StatusLineInsert#'  .. icons.diagnostics.INFO .. ' ' .. counts.I .. '%* ') end
-  if counts.H > 0 then table.insert(result, '%#StatusLineCommand#' .. icons.diagnostics.HINT .. ' ' .. counts.H .. '%* ') end
+	local result = {}
+	if counts.E > 0 then
+		table.insert(result,
+			'%#StatusLineNormal#' .. icons.diagnostics.ERROR .. ' ' .. counts.E .. '%* ')
+	end
+	if counts.W > 0 then
+		table.insert(result,
+			'%#StatusLineVisual#' .. icons.diagnostics.WARN .. ' ' .. counts.W .. '%* ')
+	end
+	if counts.I > 0 then
+		table.insert(result,
+			'%#StatusLineInsert#' .. icons.diagnostics.INFO .. ' ' .. counts.I .. '%* ')
+	end
+	if counts.H > 0 then
+		table.insert(result,
+			'%#StatusLineCommand#' .. icons.diagnostics.HINT .. ' ' .. counts.H .. '%* ')
+	end
 
-  return table.concat(result, ' ')
+	return table.concat(result, ' ')
+end
+
+local function media_info()
+	local handle = io.popen("playerctl metadata --format '{{title}} - {{artist}}' 2>/dev/null")
+	if not handle then
+		return ''
+	end
+
+	local title = handle:read('*a')
+	handle:close()
+
+	if not title or title == '' then
+		return ''
+	end
+
+	-- trim whitespace and newlines
+	title = title:gsub('^%s*(.-)%s*$', '%1')
+
+	-- truncate long titles
+	if #title > 40 then
+		title = title:sub(1, 37) .. '...'
+	end
+
+	return string.format('%%#StatusLineNormal# %s%%*', title)
 end
 
 function _G.statusline()
 	return table.concat({
-		' ', mode(),										-- mode
-		' ', filetype_icon(),								-- File icon
-		' %f',												-- File path
-		' %#StatusLineSelect#' .. git_branch() .. '%*',		-- Git branch
-		' %#StatusLineSelect#' .. '%m' .. '%*',				-- Modified flag [+]
-		' %#StatusLineNormal#' .. '%r' .. '%*',				-- Readonly flag [RO]
-		' %= ',												-- Right align
-		' ' .. lsp_diagnostics(),							-- LSP diagnostics
-		' %#StatusLineSelect#' .. lsp_status() .. '%*',		-- LSP status
-		' %#StatusLineReplace#' .. '%{&ff}' .. '%*',		-- File format (unix/dos/mac)
-		' %#StatusLineSelect#'  .. '%p%%'     .. '%*',		-- Percentage through file
-		' %#StatusLineVisual#'  .. '%l:%c'    .. '%* ',		-- Line and column
+		' ', mode(),                              -- mode
+		' ', filetype_icon(),                     -- File icon
+		' %f',                                    -- File path
+		' %#StatusLineSelect#' .. git_branch() .. '%*', -- Git branch
+		' %#StatusLineSelect#' .. '%m' .. '%*',   -- Modified flag [+]
+		' %#StatusLineNormal#' .. '%r' .. '%*',   -- Readonly flag [RO]
+		' %= ',                                   -- Right align
+		' ' .. media_info(),                      -- Media info
+		' ' .. lsp_diagnostics(),                 -- LSP diagnostics
+		' %#StatusLineSelect#' .. lsp_status() .. '%*', -- LSP status
+		' %#StatusLineReplace#' .. '%{&ff}' .. '%*', -- File format (unix/dos/mac)
+		' %#StatusLineSelect#' .. '%p%%' .. '%*', -- Percentage through file
+		' %#StatusLineVisual#' .. '%l:%c' .. '%* ', -- Line and column
 	})
 end
 

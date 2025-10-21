@@ -27,6 +27,7 @@ vim.opt.colorcolumn = '80'
 vim.opt.showmatch = false
 vim.opt.matchtime = 0
 vim.opt.cmdheight = 1
+vim.opt.shortmess:append('W')
 vim.opt.completeopt = 'menuone,noinsert,noselect'
 vim.opt.showmode = true
 vim.opt.pumheight = 10

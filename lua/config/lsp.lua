@@ -29,12 +29,28 @@ vim.pack.add({
 require('mini.icons').setup({})
 require('fidget').setup({})
 require('neodev').setup({})
-local lspconfig = require('lspconfig')
+--local lspconfig = require('lspconfig')
 local capabilities = require('blink.cmp').get_lsp_capabilities()
 
-lspconfig.lua_ls.setup({ capabilities = capabilities })
-lspconfig.gopls.setup({ capabilities = capabilities })
-lspconfig.clangd.setup({ capabilities = capabilities })
+vim.lsp.config("*", { capabilities = capabilities })
+
+local language_servers = {
+	"lua_ls",
+	"gopls",
+	"clangd",
+	"arduino_language_server",
+	"tinymist",
+	"ts_ls",
+	"ols",
+	"pyright",
+	"rust_analyzer",
+	"zls",
+}
+
+for _, server in pairs(language_servers) do
+	vim.lsp.enable(server)
+end
+
 
 require('blink.cmp').setup({
 	appearance = {

@@ -13,7 +13,7 @@ vim.api.nvim_create_autocmd('BufWritePost', {
 	group = augroup,
 	pattern = '*.tex',
 	callback = function()
-		path = vim.api.nvim_buf_get_name(0)
+		local path = vim.api.nvim_buf_get_name(0)
 		vim.cmd('silent !pdflatex ' .. path)
 	end,
 })
