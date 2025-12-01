@@ -45,6 +45,7 @@ local language_servers = {
 	"pyright",
 	"rust_analyzer",
 	"zls",
+	"elp" -- erlang language platform
 }
 
 for _, server in pairs(language_servers) do
