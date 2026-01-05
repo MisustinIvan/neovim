@@ -61,6 +61,25 @@ vim.keymap.set('n', '<leader>pa', function()
 	print('file: ' .. path)
 end)
 
+-- insert current date
+vim.keymap.set('n', '<leader>td', function()
+	local handle = io.popen('date +"%b %d %G" 2>/dev/null')
+	if not handle then
+		print('can\'t insert date')
+		return
+	end
+
+	local date = handle:read('*l')
+	handle:close()
+
+	if not date or date == '' then
+		print('can\'t insert date')
+		return
+	end
+
+	vim.api.nvim_put({ date .. ' ' }, 'c', false, true)
+end)
+
 -- terminal keymaps
 vim.keymap.set('t', '<esc>', '<C-\\><C-n>')
 
