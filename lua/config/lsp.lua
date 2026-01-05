@@ -33,6 +33,7 @@ require('neodev').setup({})
 local capabilities = require('blink.cmp').get_lsp_capabilities()
 
 vim.lsp.config("*", { capabilities = capabilities })
+vim.lsp.config("elixirls", { cmd = { "/usr/bin/elixir-ls" } })
 
 local language_servers = {
 	"lua_ls",
