@@ -3,6 +3,7 @@ require('config.keymaps')
 require('config.autocmds')
 require('config.statusline')
 require('config.lsp')
+require('config.diary')
 
 require('plugins.telescope')
 require('plugins.oil')
