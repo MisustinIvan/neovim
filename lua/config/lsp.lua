@@ -34,6 +34,14 @@ local capabilities = require('blink.cmp').get_lsp_capabilities()
 
 vim.lsp.config("*", { capabilities = capabilities })
 vim.lsp.config("elixirls", { cmd = { "/usr/bin/elixir-ls" } })
+vim.lsp.config("lua_ls", {
+	settings = {
+		Lua = {
+			diagnostics = {
+				globals = { "vim" } }
+		}
+	}
+})
 
 local language_servers = {
 	"lua_ls",
