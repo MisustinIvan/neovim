@@ -35,3 +35,27 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 		vim.highlight.on_yank()
 	end,
 })
+
+vim.api.nvim_create_autocmd('BufWritePost', {
+	desc = 'compile typst files on save',
+	pattern = '*.typ',
+	group = augroup,
+	callback = function()
+		local filename = vim.fn.expand('%:p')
+		local command = "typst compile " .. filename .. " &"
+		vim.fn.system(command)
+	end
+})
+
+vim.api.nvim_create_autocmd('BufEnter', {
+	desc = 'Open Typst PDF file on buffer open',
+	pattern = '*.typ',
+	group = augroup,
+	callback = function()
+		local typ_filename = vim.fn.expand('%:p')
+		local pdf_filename = typ_filename:gsub("%.typ$", ".pdf")
+
+		local open_command = "zathura " .. pdf_filename .. " &"
+		vim.fn.system(open_command)
+	end
+})
