@@ -47,13 +47,16 @@ vim.api.nvim_create_autocmd('BufWritePost', {
 	end
 })
 
-vim.api.nvim_create_autocmd('BufEnter', {
+vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufReadPre' }, {
 	desc = 'Open Typst PDF file on buffer open',
 	pattern = '*.typ',
 	group = augroup,
 	callback = function()
 		local typ_filename = vim.fn.expand('%:p')
 		local pdf_filename = typ_filename:gsub("%.typ$", ".pdf")
+
+		local compile_command = "typst compile " .. typ_filename
+		vim.fn.system(compile_command)
 
 		local open_command = "zathura " .. pdf_filename .. " &"
 		vim.fn.system(open_command)
