@@ -47,6 +47,24 @@ vim.api.nvim_create_autocmd('BufWritePost', {
 	end
 })
 
+local handles = {}
+local function start_process(command, args)
+	local handle = vim.loop.spawn(command, {
+		args = args,
+	})
+	table.insert(handles, handle)
+end
+
+vim.api.nvim_create_autocmd("VimLeavePre", {
+	callback = function()
+		for _, handle in pairs(handles) do
+			if handle and not handle:is_closing() then
+				handle:kill(15)
+			end
+		end
+	end
+})
+
 vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufReadPre' }, {
 	desc = 'Open Typst PDF file on buffer open',
 	pattern = '*.typ',
@@ -55,10 +73,8 @@ vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufReadPre' }, {
 		local typ_filename = vim.fn.expand('%:p')
 		local pdf_filename = typ_filename:gsub("%.typ$", ".pdf")
 
-		local compile_command = "typst compile " .. typ_filename
-		vim.fn.system(compile_command)
-
-		local open_command = "zathura " .. pdf_filename .. " &"
-		vim.fn.system(open_command)
+		vim.system({ "typst", "compile", typ_filename }, nil, function()
+			start_process("zathura", { pdf_filename })
+		end)
 	end
 })
