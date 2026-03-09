@@ -86,6 +86,11 @@ vim.keymap.set('t', '<esc>', '<C-\\><C-n>')
 vim.keymap.set('n', '<leader>nt', '<cmd>terminal<cr>',
 	{ desc = 'opens a new terminal in the current buffer', silent = true })
 
+vim.keymap.set('n', '<leader>nT', function()
+	vim.cmd('tabnew')
+	vim.cmd('terminal')
+end, { desc = 'opens a new terminal in a new tab', silent = true })
+
 -- working with tabs
 vim.api.nvim_set_keymap('n', '<leader>tN', '<cmd>tabnew<cr>', { desc = 'create tab' })
 vim.api.nvim_set_keymap('n', '<leader>tC', '<cmd>tabclose<cr>', { desc = 'delete tab' })
