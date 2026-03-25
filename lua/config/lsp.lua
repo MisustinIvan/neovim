@@ -44,22 +44,30 @@ vim.lsp.config("lua_ls", {
 })
 
 local language_servers = {
-	"lua_ls",
-	"gopls",
-	"clangd",
-	"arduino_language_server",
-	"tinymist",
-	"ts_ls",
-	"ols",
-	"pyright",
-	"rust_analyzer",
-	"zls",
-	"elp", -- erlang language platform
-	"elixirls",
+	{ "lua_ls" },
+	{ "gopls" },
+	{ "clangd" },
+	{ "arduino_language_server" },
+	{ "tinymist" },
+	{ "ts_ls" },
+	{ "ols" },
+	{ "pyright" },
+	{ "rust_analyzer" },
+	{ "zls" },
+	{ "elp" }, -- erlang language platform
+	{ "elixirls" },
+	{ "qmlls",                  { cmd = { "qmlls6" } } },
 }
 
-for _, server in pairs(language_servers) do
-	vim.lsp.enable(server)
+
+for _, lsp in pairs(language_servers) do
+	local name, config = lsp[1], lsp[2]
+
+	vim.lsp.enable(name)
+
+	if config then
+		vim.lsp.config(name, config)
+	end
 end
 
 
