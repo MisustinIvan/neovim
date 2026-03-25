@@ -27,6 +27,21 @@ require('nvim-treesitter.configs').setup({
 	auto_install = true,
 })
 
+local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+parser_config.ilang = {
+	install_info = {
+		url = "~/SourceCode/ilang/docs/grammar/",
+		files = { "src/parser.c" },
+	},
+	filetype = "ilang",
+}
+
+vim.filetype.add({
+	extension = {
+		ilang = "ilang",
+	},
+})
+
 vim.api.nvim_create_autocmd('PackChanged', {
 	desc = 'update treesitter parsers',
 	callback = function(event)
