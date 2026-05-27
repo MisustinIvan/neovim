@@ -1,7 +1,7 @@
 vim.pack.add({
 	{
 		src = 'https://github.com/nvim-treesitter/nvim-treesitter',
-		version = 'master',
+		version = 'main',
 	},
 })
 
@@ -16,7 +16,7 @@ local filetypes = {
 	'sql',
 }
 
-require('nvim-treesitter.configs').setup({
+require('nvim-treesitter').setup({
 	ensure_installed = filetypes,
 	highlight = {
 		enable = true,
@@ -25,21 +25,6 @@ require('nvim-treesitter.configs').setup({
 		enable = true,
 	},
 	auto_install = true,
-})
-
-local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-parser_config.ilang = {
-	install_info = {
-		url = "~/SourceCode/ilang/docs/grammar/",
-		files = { "src/parser.c" },
-	},
-	filetype = "ilang",
-}
-
-vim.filetype.add({
-	extension = {
-		ilang = "ilang",
-	},
 })
 
 vim.api.nvim_create_autocmd('PackChanged', {

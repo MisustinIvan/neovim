@@ -21,9 +21,10 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 vim.pack.add({
 	'https://github.com/neovim/nvim-lspconfig',
 	'https://github.com/saghen/blink.cmp',
+	'https://github.com/saghen/blink.lib',
 	'https://github.com/j-hui/fidget.nvim',
 	'https://github.com/folke/neodev.nvim',
-	'https://github.com/mini-nvim/mini.icons',
+	'https://github.com/nvim-mini/mini.icons',
 })
 
 require('mini.icons').setup({})
