@@ -10,7 +10,7 @@ ts.setup({
 	install_dir = vim.fn.stdpath("data") .. "/site"
 })
 
-local filetypes = { 'go', 'lua', 'html', 'javascript', 'css', 'csv', 'tsv', 'sql' }
+local filetypes = { 'go', 'lua', 'html', 'javascript', 'css', 'csv', 'tsv', 'sql', 'typescript', 'tsx', 'jsx' }
 local installed = require("nvim-treesitter.config").get_installed()
 
 local to_install = vim.iter(filetypes):filter(function(lang)

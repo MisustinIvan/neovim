@@ -1,3 +1,5 @@
+require('plugins.nvim-web-devicons')
+
 require('config.options')
 require('config.keymaps')
 require('config.autocmds')
@@ -11,9 +13,10 @@ require('plugins.nvim-treesitter')
 
 require('plugins.gruber-darker')
 require('plugins.kanagawa')
-vim.cmd.colorscheme('gruber-darker')
+vim.cmd.colorscheme('kanagawa')
 
 require('plugins.mini-pairs')
 require('plugins.nvim-highlight-colors')
 require('plugins.gitsigns')
 require('plugins.trouble')
+require('plugins.render-markdown')
