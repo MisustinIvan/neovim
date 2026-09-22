@@ -23,52 +23,42 @@ vim.pack.add({
 	'https://github.com/saghen/blink.cmp',
 	'https://github.com/saghen/blink.lib',
 	'https://github.com/j-hui/fidget.nvim',
-	'https://github.com/folke/neodev.nvim',
+	'https://github.com/folke/lazydev.nvim',
 	'https://github.com/nvim-mini/mini.icons',
 })
 
 require('mini.icons').setup({})
 require('fidget').setup({})
-require('neodev').setup({})
---local lspconfig = require('lspconfig')
+require('lazydev').setup({})
+
 local capabilities = require('blink.cmp').get_lsp_capabilities()
 
-vim.lsp.config("*", { capabilities = capabilities })
-vim.lsp.config("elixirls", { cmd = { "/usr/bin/elixir-ls" } })
-vim.lsp.config("lua_ls", {
-	settings = {
-		Lua = {
-			diagnostics = {
-				globals = { "vim" } }
-		}
-	}
-})
+vim.lsp.config('*', { capabilities = capabilities })
 
 local language_servers = {
-	{ "lua_ls" },
-	{ "gopls" },
-	{ "clangd" },
-	{ "arduino_language_server" },
-	{ "tinymist" },
-	{ "ts_ls" },
-	{ "ols" },
-	{ "pyright" },
-	{ "rust_analyzer" },
-	{ "zls" },
-	{ "elp" }, -- erlang language platform
-	{ "elixirls" },
-	{ "qmlls",                  { cmd = { "qmlls6" } } },
+	{ 'lua_ls' },
+	{ 'gopls' },
+	{ 'clangd' },
+	{ 'arduino_language_server' },
+	{ 'tinymist' },
+	{ 'ts_ls' },
+	{ 'ols' },
+	{ 'pyright' },
+	{ 'rust_analyzer' },
+	{ 'zls' },
+	{ 'elp' },
+	{ 'elixirls',               { cmd = { '/usr/bin/elixir-ls' } } },
+	{ 'qmlls',                  { cmd = { 'qmlls6' } } },
 }
 
-
-for _, lsp in pairs(language_servers) do
+for _, lsp in ipairs(language_servers) do
 	local name, config = lsp[1], lsp[2]
-
-	vim.lsp.enable(name)
 
 	if config then
 		vim.lsp.config(name, config)
 	end
+
+	vim.lsp.enable(name)
 end
 
 

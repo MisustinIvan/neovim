@@ -1,3 +1,10 @@
+-- to be able to run build scripts for example
+vim.api.nvim_create_autocmd('PackChanged', {
+	callback = function(ev)
+		require('config.vim_pack').run_callbacks(ev)
+	end,
+})
+
 require('plugins.nvim-web-devicons')
 
 require('config.options')
@@ -21,3 +28,4 @@ require('plugins.nvim-highlight-colors')
 require('plugins.gitsigns')
 require('plugins.trouble')
 require('plugins.render-markdown')
+require('plugins.strudel')

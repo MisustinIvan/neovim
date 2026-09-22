@@ -30,13 +30,10 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
-vim.api.nvim_create_autocmd('PackChanged', {
-	desc = 'update treesitter parsers',
-	callback = function(event)
-		if event.data.kind == 'update' then
-			if event.data.spec.src == 'https://github.com/nvim-treesitter/nvim-treesitter' then
-				vim.cmd("TSUpdate")
-			end
+require('config.vim_pack').add_callback(function(event)
+	if event.data.kind == 'update' then
+		if event.data.spec.src == 'https://github.com/nvim-treesitter/nvim-treesitter' then
+			vim.cmd("TSUpdate")
 		end
-	end,
-})
+	end
+end)
