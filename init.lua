@@ -21,7 +21,7 @@ require('plugins.nvim-treesitter')
 
 require('plugins.gruber-darker')
 require('plugins.kanagawa')
-vim.cmd.colorscheme('kanagawa')
+vim.cmd.colorscheme('gruber-darker')
 
 require('plugins.mini-pairs')
 require('plugins.nvim-highlight-colors')
