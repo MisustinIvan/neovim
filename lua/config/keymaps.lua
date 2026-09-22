@@ -63,7 +63,7 @@ end)
 
 -- insert current date
 vim.keymap.set('n', '<leader>td', function()
-	local diary = require('config.diary')
+	local diary = require('config.wikis').diary
 	vim.api.nvim_put({ diary:date_string() .. ' ' }, 'c', false, true)
 end, { desc = 'insert current date', silent = true })
 
