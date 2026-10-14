@@ -14,6 +14,8 @@ M.opts = {
 			-- tried in order when the previous model keeps failing with overload/rate-limit errors
 			fallback_models = { 'deepseek-v4.1-flash-thinking', 'thinker' },
 			api_key_env = 'E_INFRA_API_TOKEN',
+			-- thinking models can reason for minutes on harder figures, 'low' roughly halves that
+			reasoning_effort = 'low',
 		},
 		gemini = {
 			model = 'gemini-3.8-flash',
@@ -29,7 +31,10 @@ M.opts = {
 	fallback_cetz_version = '0.4.2',
 	-- lines of surrounding document passed to the model as context
 	context_lines = 30,
-	timeout = 180,
+	-- the response is streamed: give up on a model when nothing arrives for idle_timeout seconds,
+	-- or when a single request runs longer than timeout seconds overall
+	idle_timeout = 60,
+	timeout = 600,
 	-- send a desktop notification via notify-send when a generation finishes
 	desktop_notify = true,
 }
@@ -92,9 +97,11 @@ figure, you write CeTZ code that compiles on the first try and looks clean.
   `grid(from, to, step: 0.5)`, `group({ set-origin((x, y)); ... })`.
 - Function plots: sample points in a loop and draw one line through them:
   `let pts = range(61).map(i => { let x = 2 * calc.pi * i / 60; (x, calc.sin(x)) })`, `line(..pts)`.
-- Math: never create variables named like math symbols (`pi`, `alpha`, `theta`, ...); a
-  `let pi = calc.pi` makes `$pi/2$` render as 1.5707... Use `calc.pi` in computations and
-  `$pi/2$` in labels.
+- Math: a `let` variable shadows the symbol of the same name inside every `$...$`, so
+  `let delta = 1.2` makes `$a - delta$` render as "a - 1.2" and `let pi = calc.pi` makes `$pi/2$`
+  render as 1.5707... Never name variables after Greek letters or other math symbols (`pi`, `delta`,
+  `epsilon`, `alpha`, `theta`, `sigma`, `mu`, `lambda`, ...); use names like `d-val`, `eps-val`.
+  Use `calc.pi` in computations and `$pi/2$`, `$a - delta$` in labels.
 - Text labels are content blocks `[Start]`; use math mode only for symbols and formulas
   (`$a$`, `$q_0$`, `$x^2$`). Never `$Start$`.
 - Typst has no global `zip`/`len`/`map`; use methods: `a.zip(b)`, `a.len()`, `a.map(f)`.
@@ -159,11 +166,13 @@ local function strip_thinking(text)
 	return (text:gsub('^%s*<think>.-</think>', ''))
 end
 
--- each backend turns a request into curl arguments and a response into text
+-- each backend turns a request into curl arguments and each streamed (sse) event into
+-- a { content = ..., reasoning = ..., finish = ... } delta
 local backends = {
 	gemini = {
 		url = function(model)
-			return ('https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent'):format(model)
+			return ('https://generativelanguage.googleapis.com/v1beta/models/%s:streamGenerateContent?alt=sse')
+				:format(model)
 		end,
 		auth_header = function(key) return 'x-goog-api-key: ' .. key end,
 		payload = function(_, system, user)
@@ -173,23 +182,21 @@ local backends = {
 				generationConfig = { temperature = 0.3 },
 			}
 		end,
-		parse = function(decoded)
+		chunk = function(decoded)
 			local candidate = decoded.candidates and decoded.candidates[1]
-			local parts = candidate and candidate.content and candidate.content.parts
-			if not parts then
-				local reason = candidate and candidate.finishReason
-					or (decoded.promptFeedback and decoded.promptFeedback.blockReason)
-					or 'unknown'
-				return nil, 'no content returned (reason: ' .. reason .. ')'
-			end
-			local chunks = {}
+			local delta = {
+				finish = (candidate and candidate.finishReason)
+					or (decoded.promptFeedback and decoded.promptFeedback.blockReason),
+			}
+			local parts = candidate and candidate.content and candidate.content.parts or {}
 			for _, part in ipairs(parts) do
-				-- skip thought summaries if the model returns any
-				if part.text and not part.thought then
-					table.insert(chunks, part.text)
+				if part.text then
+					-- thought summaries count as reasoning, not as the answer
+					local field = part.thought and 'reasoning' or 'content'
+					delta[field] = (delta[field] or '') .. part.text
 				end
 			end
-			return table.concat(chunks)
+			return delta
 		end,
 	},
 	einfra = {
@@ -203,15 +210,19 @@ local backends = {
 					{ role = 'user', content = user },
 				},
 				temperature = 0.3,
+				stream = true,
+				reasoning_effort = provider().reasoning_effort,
 			}
 		end,
-		parse = function(decoded)
-			local choice = decoded.choices and decoded.choices[1]
-			local content = choice and choice.message and choice.message.content
-			if type(content) ~= 'string' or content == '' then
-				return nil, 'no content returned (reason: ' .. tostring(choice and choice.finish_reason) .. ')'
-			end
-			return content
+		chunk = function(decoded)
+			local choice = decoded.choices and decoded.choices[1] or {}
+			local d = choice.delta or {}
+			local reasoning = d.reasoning_content or d.reasoning
+			return {
+				content = type(d.content) == 'string' and d.content or nil,
+				reasoning = type(reasoning) == 'string' and reasoning or nil,
+				finish = choice.finish_reason ~= vim.NIL and choice.finish_reason or nil,
+			}
 		end,
 	},
 }
@@ -226,16 +237,55 @@ end
 
 local retryable_status = { [429] = true, [500] = true, [502] = true, [503] = true, [504] = true }
 
-local function request(api_key, model, system, user, callback)
+-- callback(text, err, retry) where retry is 'same' for transient errors worth retrying on the
+-- same model, 'next' for a stalled/too slow model, nil otherwise
+-- progress({ reasoning = n, content = n }) is called as tokens stream in
+local function request(api_key, model, system, user, progress, callback)
 	local backend = backends[M.opts.provider]
 	local tmp = vim.fn.tempname()
 	vim.fn.writefile({ vim.json.encode(backend.payload(model, system, user)) }, tmp)
 
+	local pending = ''
+	local content, raw = {}, {}
+	local counts = { reasoning = 0, content = 0 }
+	local finish, stream_err
+
+	local function handle_line(line)
+		local data = line:match('^data:%s*(.*)$')
+		if not data then
+			-- not an sse event: a plain json error body, or the trailing http status
+			table.insert(raw, line)
+			return
+		end
+		if data == '[DONE]' or data == '' then
+			return
+		end
+		local ok, decoded = pcall(vim.json.decode, data)
+		if not ok or type(decoded) ~= 'table' then
+			return
+		end
+		if decoded.error then
+			stream_err = error_message(decoded)
+			return
+		end
+		local delta = backend.chunk(decoded)
+		-- streams often open with empty deltas, only count real tokens
+		if delta.reasoning and delta.reasoning ~= '' then
+			counts.reasoning = counts.reasoning + 1
+		end
+		if delta.content and delta.content ~= '' then
+			counts.content = counts.content + 1
+			table.insert(content, delta.content)
+		end
+		finish = delta.finish or finish
+	end
+
 	-- the api key goes through stdin as curl config so it doesn't show up in the process list,
 	-- the http status is appended on its own line after the body
 	return vim.system({
-		'curl', '-sS',
+		'curl', '-sS', '-N',
 		'--max-time', tostring(M.opts.timeout),
+		'--speed-limit', '1', '--speed-time', tostring(M.opts.idle_timeout),
 		'-X', 'POST', backend.url(model),
 		'-H', 'Content-Type: application/json',
 		'--data-binary', '@' .. tmp,
@@ -244,33 +294,47 @@ local function request(api_key, model, system, user, callback)
 	}, {
 		text = true,
 		stdin = ('header = "%s"\n'):format(backend.auth_header(api_key)),
+		stdout = function(_, data)
+			if not data then
+				return
+			end
+			pending = pending .. data
+			for line in pending:gmatch('(.-)\r?\n') do
+				handle_line(line)
+			end
+			pending = pending:match('[^\n]*$')
+			vim.schedule(function() progress(counts) end)
+		end,
 	}, vim.schedule_wrap(function(res)
 		os.remove(tmp)
 		if res.signal ~= 0 then
 			return callback(nil, 'cancelled')
 		end
+		if res.code == 28 then
+			return callback(nil, ('%s stalled or took too long (%d thinking, %d answer tokens)')
+				:format(model, counts.reasoning, counts.content), 'next')
+		end
 		if res.code ~= 0 then
-			-- network level failure (timeout, dns, ...), worth another try
-			return callback(nil, vim.trim(res.stderr or ('curl exited with ' .. res.code)), true)
+			-- network level failure (dns, connection reset, ...), worth another try
+			return callback(nil, vim.trim(res.stderr or ('curl exited with ' .. res.code)), 'same')
 		end
 
-		local body, status = (res.stdout or ''):match('^(.*)\n(%d+)$')
-		status = tonumber(status) or 0
-		local ok, decoded = pcall(vim.json.decode, body or '')
-		if not ok or type(decoded) ~= 'table' then
-			return callback(nil, ('HTTP %d: %s'):format(status, vim.trim(body or ''):sub(1, 200)),
-				retryable_status[status])
-		end
-		if status >= 400 or decoded.error then
-			return callback(nil, ('HTTP %d: %s'):format(status, error_message(decoded) or 'unknown error'),
-				retryable_status[status])
+		-- whatever is left after the last newline is the http status from -w
+		local status = tonumber(vim.trim(pending)) or 0
+		local retry = retryable_status[status] and 'same' or nil
+		if status >= 400 or stream_err then
+			local body = table.concat(raw, '\n')
+			local ok, decoded = pcall(vim.json.decode, body)
+			local msg = stream_err or (ok and type(decoded) == 'table' and error_message(decoded))
+				or vim.trim(body):sub(1, 200)
+			return callback(nil, ('HTTP %d: %s'):format(status, msg), retry)
 		end
 
-		local text, err = backend.parse(decoded)
-		if text then
-			text = strip_fences(strip_thinking(text))
+		local text = strip_fences(strip_thinking(table.concat(content)))
+		if text == '' then
+			return callback(nil, 'no content returned (reason: ' .. tostring(finish) .. ')')
 		end
-		callback(text, err)
+		callback(text)
 	end))
 end
 
@@ -352,7 +416,7 @@ function M.generate(buf, row, description)
 
 	local id = vim.api.nvim_buf_set_extmark(buf, ns, row, 0, {})
 	local key = buf .. ':' .. id
-	local job = { timer = vim.uv.new_timer(), frame = 1, started = vim.uv.now(), note = '' }
+	local job = { timer = vim.uv.new_timer(), frame = 1, started = vim.uv.now(), note = '', phase = 'waiting' }
 	jobs[key] = job
 
 	local function render()
@@ -361,8 +425,8 @@ function M.generate(buf, row, description)
 			return
 		end
 		local secs = math.floor((vim.uv.now() - job.started) / 1000)
-		set_status(buf, id, r, ('%s generating CeTZ figure… %ds%s'):format(spinner[job.frame], secs, job.note),
-			'CetzAiStatus')
+		set_status(buf, id, r, ('%s CeTZ figure: %s · %ds · %s%s'):format(
+			spinner[job.frame], job.phase, secs, job.model, job.note), 'CetzAiStatus')
 	end
 	render()
 	job.timer:start(100, 100, vim.schedule_wrap(function()
@@ -375,28 +439,43 @@ function M.generate(buf, row, description)
 
 	local models = { provider().model, unpack(provider().fallback_models) }
 	local model_idx, attempt = 1, 1
+	job.model = models[model_idx]
 
-	local function on_response(text, err, retryable)
+	local function on_progress(counts)
+		if counts.content > 0 then
+			job.phase = ('writing %d tokens'):format(counts.content)
+		elseif counts.reasoning > 0 then
+			job.phase = ('thinking %d tokens'):format(counts.reasoning)
+		end
+	end
+
+	local on_response
+
+	local function start()
+		job.model, job.phase = models[model_idx], 'waiting'
+		job.proc = request(api_key, models[model_idx], system, user, on_progress, on_response)
+	end
+
+	on_response = function(text, err, retry)
 		if not jobs[key] then
 			return
 		end
-		if not text and retryable and err ~= 'cancelled' then
-			if attempt < M.opts.attempts then
-				attempt = attempt + 1
-			elseif model_idx < #models then
-				model_idx, attempt = model_idx + 1, 1
-			else
-				retryable = false
-			end
+		-- transient errors are retried on the same model, a stalled model is skipped right away
+		if not text and retry == 'same' and attempt < M.opts.attempts then
+			attempt = attempt + 1
+		elseif not text and retry and model_idx < #models then
+			model_idx, attempt = model_idx + 1, 1
+		else
+			retry = nil
 		end
 
-		if not text and retryable and err ~= 'cancelled' then
+		if not text and retry then
 			local delay = attempt == 1 and 0 or 2000 * (attempt - 1)
-			job.note = (' (%s, attempt %d: %s)'):format(models[model_idx], attempt, err:sub(1, 40))
+			job.note = (' (retry %d: %s)'):format(attempt, err:sub(1, 50))
 			job.proc = nil
 			vim.defer_fn(function()
 				if jobs[key] and not job.cancelled then
-					job.proc = request(api_key, models[model_idx], system, user, on_response)
+					start()
 				end
 			end, delay)
 			return
@@ -424,7 +503,7 @@ function M.generate(buf, row, description)
 			vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ':t'), r + 1, models[model_idx]))
 	end
 
-	job.proc = request(api_key, models[model_idx], system, user, on_response)
+	start()
 end
 
 -- cancel all generations whose status line is the cursor line
