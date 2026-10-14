@@ -49,6 +49,7 @@ local language_servers = {
 	{ 'elp' },
 	{ 'elixirls',               { cmd = { '/usr/bin/elixir-ls' } } },
 	{ 'qmlls',                  { cmd = { 'qmlls6' } } },
+	{ 'forls' },
 }
 
 for _, lsp in ipairs(language_servers) do
