@@ -40,6 +40,7 @@ local language_servers = {
 	{ 'gopls' },
 	{ 'clangd' },
 	{ 'arduino_language_server' },
+	{ 'haskell_language_server' },
 	{ 'tinymist' },
 	{ 'ts_ls' },
 	{ 'ols' },
