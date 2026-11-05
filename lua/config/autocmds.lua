@@ -88,6 +88,7 @@ vim.api.nvim_create_autocmd("FileType", {
 				vim.system({
 					"kitty", "@", "launch",
 					"--location=vsplit",
+					"--keep-focus",
 					"--cwd=current",
 					"termpdf.py", pdf
 				})
