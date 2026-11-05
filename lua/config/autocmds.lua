@@ -36,45 +36,62 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 	end,
 })
 
-vim.api.nvim_create_autocmd('BufWritePost', {
-	desc = 'compile typst files on save',
-	pattern = '*.typ',
-	group = augroup,
-	callback = function()
-		local filename = vim.fn.expand('%:p')
-		local command = "typst compile " .. filename .. " &"
-		vim.fn.system(command)
-	end
-})
+-- one `typst watch` per source file, keyed by absolute path
+local typst_watch_jobs = {}
 
-local handles = {}
-local function start_process(command, args)
-	local handle = vim.loop.spawn(command, {
-		args = args,
-	})
-	table.insert(handles, handle)
+local function stop_typst_watch(src)
+	local job = typst_watch_jobs[src]
+	if job then
+		vim.fn.jobstop(job)
+		typst_watch_jobs[src] = nil
+	end
 end
 
-vim.api.nvim_create_autocmd("VimLeavePre", {
-	callback = function()
-		for _, handle in pairs(handles) do
-			if handle and not handle:is_closing() then
-				handle:kill(15)
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "typst",
+	group = augroup,
+	callback = function(ev)
+		local src = vim.api.nvim_buf_get_name(ev.buf)
+		if src == "" then return end
+		local pdf = vim.fn.fnamemodify(src, ":r") .. ".pdf"
+
+		-- Compile in background (only if not already watching this file)
+		if not typst_watch_jobs[src] then
+			local job = vim.fn.jobstart({ "typst", "watch", src, pdf }, {
+				on_exit = function(id)
+					if typst_watch_jobs[src] == id then
+						typst_watch_jobs[src] = nil
+					end
+				end,
+			})
+			if job > 0 then
+				typst_watch_jobs[src] = job
 			end
 		end
-	end
-})
 
-vim.api.nvim_create_autocmd({ 'BufNewFile', 'BufReadPre' }, {
-	desc = 'Open Typst PDF file on buffer open',
-	pattern = '*.typ',
-	group = augroup,
-	callback = function()
-		local typ_filename = vim.fn.expand('%:p')
-		local pdf_filename = typ_filename:gsub("%.typ$", ".pdf")
+		-- Stop watching once the buffer goes away
+		vim.api.nvim_clear_autocmds({ group = augroup, event = "BufUnload", buffer = ev.buf })
+		vim.api.nvim_create_autocmd("BufUnload", {
+			group = augroup,
+			buffer = ev.buf,
+			once = true,
+			callback = function()
+				stop_typst_watch(src)
+			end,
+		})
 
-		vim.system({ "typst", "compile", typ_filename }, nil, function()
-			start_process("zathura", { pdf_filename })
-		end)
-	end
+		-- Open termpdf in a kitty split window
+		-- --location=vsplit is only honoured by kitty's "splits" layout; in any
+		-- other layout (default is "fat") the new window lands at the bottom.
+		vim.keymap.set("n", "<leader>tp", function()
+			vim.system({ "kitty", "@", "goto-layout", "splits" }, {}, function()
+				vim.system({
+					"kitty", "@", "launch",
+					"--location=vsplit",
+					"--cwd=current",
+					"termpdf.py", pdf
+				})
+			end)
+		end, { buffer = true, desc = "Typst: Open internal Kitty preview" })
+	end,
 })
