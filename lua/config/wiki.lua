@@ -337,6 +337,13 @@ function Wiki:todos()
 	return todos
 end
 
+---how a todo is listed, the note relative to the wiki and the line it is on
+---@param todo wiki.todo
+---@return string
+function Wiki:todo_label(todo)
+	return ('%s:%d  %s'):format(relative(todo.path, self.path), todo.lnum, todo.text)
+end
+
 function Wiki:pick_todos()
 	local todos = self:todos()
 
@@ -356,7 +363,7 @@ function Wiki:pick_todos()
 				local note = relative(todo.path, root)
 				return {
 					value = todo,
-					display = ('%s:%d  %s'):format(note, todo.lnum, todo.text),
+					display = self:todo_label(todo),
 					ordinal = note .. ' ' .. todo.text,
 					filename = todo.path,
 					lnum = todo.lnum,

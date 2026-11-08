@@ -1,9 +1,10 @@
 -- the wikis register themselves when they are created
-require('config.wikis')
+local wikis = require('config.wikis')
 
 local Wiki = require('config.wiki')
 
 local startup_group = vim.api.nvim_create_augroup('CustomStartup', { clear = true })
+local homepage_ns = vim.api.nvim_create_namespace('homepage')
 
 ---@class homepage.action
 ---@field key string key opening it
@@ -51,7 +52,41 @@ vim.api.nvim_create_autocmd('VimEnter', {
 			table.insert(lines, ('[%s] %s'):format(action.key, action.label))
 		end
 
+		-- the same todos <leader>di 7 lists, <cr> on one opens it
+		local diary = wikis.diary
+		local todos = diary:todos()
+		---@type table<integer, wiki.todo>
+		local todo_at = {}
+		local todo_heading = nil
+
+		if #todos > 0 then
+			vim.list_extend(lines, { '', ('Open todos (%d)'):format(#todos) })
+			todo_heading = #lines
+			for _, todo in ipairs(todos) do
+				table.insert(lines, '  ' .. diary:todo_label(todo))
+				todo_at[#lines] = todo
+			end
+		end
+
 		vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+
+		if todo_heading then
+			vim.api.nvim_buf_set_extmark(buf, homepage_ns, todo_heading - 1, 0, {
+				end_col = #lines[todo_heading],
+				hl_group = 'Title',
+			})
+		end
+
+		for lnum in pairs(todo_at) do
+			-- the note and line, everything up to the two spaces before the text
+			local stop = lines[lnum]:find('  ', 3, true)
+			if stop then
+				vim.api.nvim_buf_set_extmark(buf, homepage_ns, lnum - 1, 2, {
+					end_col = stop - 1,
+					hl_group = 'Comment',
+				})
+			end
+		end
 
 		vim.bo[buf].buftype = 'nofile'
 		vim.bo[buf].bufhidden = 'wipe'
@@ -66,5 +101,13 @@ vim.api.nvim_create_autocmd('VimEnter', {
 		for _, action in ipairs(list) do
 			vim.keymap.set('n', action.key, action.run, map_opts)
 		end
+
+		vim.keymap.set('n', '<cr>', function()
+			local todo = todo_at[vim.api.nvim_win_get_cursor(0)[1]]
+			if todo then
+				vim.cmd.edit(vim.fn.fnameescape(todo.path))
+				vim.api.nvim_win_set_cursor(0, { todo.lnum, 0 })
+			end
+		end, map_opts)
 	end,
 })
