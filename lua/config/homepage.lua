@@ -55,6 +55,15 @@ vim.api.nvim_create_autocmd('VimEnter', {
 		-- the same todos <leader>di 7 lists, <cr> on one opens it
 		local diary = wikis.diary
 		local todos = diary:todos()
+
+		-- entries are named by date, so the newest note sorts last; within a
+		-- note the todos keep their order
+		table.sort(todos, function(a, b)
+			if a.path ~= b.path then
+				return a.path > b.path
+			end
+			return a.lnum < b.lnum
+		end)
 		---@type table<integer, wiki.todo>
 		local todo_at = {}
 		local todo_heading = nil
