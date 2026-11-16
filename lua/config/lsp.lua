@@ -41,7 +41,13 @@ local language_servers = {
 	{ 'clangd' },
 	{ 'arduino_language_server' },
 	{ 'haskell_language_server' },
-	{ 'tinymist' },
+	{ 'tinymist', {
+		-- hard memory cap: kernel kills it past the limit, `:lsp restart` brings it back
+		cmd = { 'systemd-run', '--user', '--scope', '--quiet', '-p', 'MemoryMax=2G', 'tinymist' },
+		settings = {
+			lint = { enabled = false }, -- reported to greatly reduce memory spikes (tinymist#2369)
+		},
+	} },
 	{ 'ts_ls' },
 	{ 'ols' },
 	{ 'pyright' },
