@@ -27,11 +27,12 @@ for name, link in pairs({
 end
 
 local icon = {
-	wiki = vim.fn.nr2char(0xf02d),   -- book
-	files = vim.fn.nr2char(0xf07b),  -- folder
+	wiki = vim.fn.nr2char(0xf02d), -- book
+	files = vim.fn.nr2char(0xf07b), -- folder
 	config = vim.fn.nr2char(0xf013), -- cog
-	quit = vim.fn.nr2char(0xf011),   -- power
-	todo = vim.fn.nr2char(0xf0131),  -- empty checkbox
+	quit = vim.fn.nr2char(0xf011), -- power
+	todo = vim.fn.nr2char(0xf0131), -- empty checkbox
+	terminal = '', -- terminal
 	marker = '▸',
 }
 
@@ -87,8 +88,17 @@ local function actions()
 	end
 
 	vim.list_extend(list, {
-		{ key = 'f', label = 'Open file manager', icon = icon.files, run = function() vim.cmd.edit('.') end },
-		{ key = 'c', label = 'Open config', icon = icon.config, run = function() vim.cmd.edit('~/.config/nvim/init.lua') end },
+		{ key = 'f', label = 'Open file manager', icon = icon.files,    run = function() vim.cmd.edit('.') end },
+		{ key = 't', label = 'Open terminal',     icon = icon.terminal, run = function() vim.cmd.terminal() end },
+		{
+			key = 'c',
+			label = 'Open config',
+			icon = icon.config,
+			run = function()
+				vim.cmd.edit(
+					'~/.config/nvim/init.lua')
+			end
+		},
 		{ key = 'q', label = 'Quit', icon = icon.quit, run = function() vim.cmd.quit() end },
 	})
 
@@ -277,112 +287,116 @@ local function render(buf, win, list, todos)
 	return todo_at, first, { block_pad, block_pad + BLOCK_WIDTH }
 end
 
+local function draw_homepage()
+	if vim.fn.argc() > 0 then
+		return
+	end
+
+	local buf = vim.api.nvim_create_buf(false, true)
+
+	vim.bo[buf].buftype = 'nofile'
+	vim.bo[buf].bufhidden = 'wipe'
+	vim.bo[buf].swapfile = false
+	vim.bo[buf].modifiable = false
+	vim.bo[buf].filetype = 'startup'
+
+	vim.api.nvim_win_set_buf(0, buf)
+	local win = vim.api.nvim_get_current_win()
+
+	-- local to the homepage, the next buffer in the window gets the usual ones
+	local wo = vim.wo[win][0]
+	wo.number = false
+	wo.relativenumber = false
+	wo.cursorline = false
+	wo.list = false
+	wo.colorcolumn = ''
+	wo.signcolumn = 'no'
+	wo.foldcolumn = '0'
+	wo.statuscolumn = ''
+	wo.fillchars = 'eob: '
+
+	local list = actions()
+	local todos = sorted_todos()
+	local todo_at, first, block = render(buf, win, list, todos)
+
+	---the column the todo text starts at, right after its icon
+	local function text_col(_)
+		return block[1] + #icon.todo + 2
+	end
+
+	---marks the todo under the cursor, the one <cr> opens
+	local function highlight_selected()
+		vim.api.nvim_buf_clear_namespace(buf, cursor_ns, 0, -1)
+		local lnum = vim.api.nvim_win_get_cursor(0)[1]
+		if not todo_at[lnum] then
+			return
+		end
+		local line = vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, false)[1]
+		vim.api.nvim_buf_set_extmark(buf, cursor_ns, lnum - 1, block[1], {
+			end_col = #line,
+			hl_group = 'HomepageSelected',
+			priority = 50,
+		})
+		if block[1] >= 2 then
+			vim.api.nvim_buf_set_extmark(buf, cursor_ns, lnum - 1, block[1] - 2, {
+				virt_text = { { icon.marker, 'HomepageMarker' } },
+				virt_text_pos = 'overlay',
+			})
+		end
+	end
+
+	if first then
+		vim.api.nvim_win_set_cursor(win, { first, text_col(first) })
+	end
+	highlight_selected()
+
+	vim.api.nvim_create_autocmd('CursorMoved', {
+		group = startup_group,
+		buffer = buf,
+		callback = highlight_selected,
+	})
+
+	-- keep it centered, and the cursor on the same todo
+	vim.api.nvim_create_autocmd({ 'VimResized', 'WinResized' }, {
+		group = startup_group,
+		callback = function()
+			if not vim.api.nvim_buf_is_valid(buf) then
+				return true
+			end
+			local shown = vim.fn.win_findbuf(buf)[1]
+			if not shown then
+				return
+			end
+			local selected = todo_at[vim.api.nvim_win_get_cursor(shown)[1]]
+			todo_at, first, block = render(buf, shown, list, todos)
+			for lnum, todo in pairs(todo_at) do
+				if todo == selected then
+					vim.api.nvim_win_set_cursor(shown, { lnum, text_col(lnum) })
+				end
+			end
+			vim.api.nvim_win_call(shown, highlight_selected)
+		end,
+	})
+
+	local map_opts = { silent = true, buffer = buf }
+
+	for _, action in ipairs(list) do
+		vim.keymap.set('n', action.key, action.run, map_opts)
+	end
+
+	vim.keymap.set('n', '<cr>', function()
+		local todo = todo_at[vim.api.nvim_win_get_cursor(0)[1]]
+		if todo then
+			vim.cmd.edit(vim.fn.fnameescape(todo.path))
+			vim.api.nvim_win_set_cursor(0, { todo.lnum, 0 })
+		end
+	end, map_opts)
+end
+
 vim.api.nvim_create_autocmd('VimEnter', {
 	group = startup_group,
 	nested = true,
-	callback = function()
-		if vim.fn.argc() > 0 then
-			return
-		end
-
-		local buf = vim.api.nvim_create_buf(false, true)
-
-		vim.bo[buf].buftype = 'nofile'
-		vim.bo[buf].bufhidden = 'wipe'
-		vim.bo[buf].swapfile = false
-		vim.bo[buf].modifiable = false
-		vim.bo[buf].filetype = 'startup'
-
-		vim.api.nvim_win_set_buf(0, buf)
-		local win = vim.api.nvim_get_current_win()
-
-		-- local to the homepage, the next buffer in the window gets the usual ones
-		local wo = vim.wo[win][0]
-		wo.number = false
-		wo.relativenumber = false
-		wo.cursorline = false
-		wo.list = false
-		wo.colorcolumn = ''
-		wo.signcolumn = 'no'
-		wo.foldcolumn = '0'
-		wo.statuscolumn = ''
-		wo.fillchars = 'eob: '
-
-		local list = actions()
-		local todos = sorted_todos()
-		local todo_at, first, block = render(buf, win, list, todos)
-
-		---the column the todo text starts at, right after its icon
-		local function text_col(_)
-			return block[1] + #icon.todo + 2
-		end
-
-		---marks the todo under the cursor, the one <cr> opens
-		local function highlight_selected()
-			vim.api.nvim_buf_clear_namespace(buf, cursor_ns, 0, -1)
-			local lnum = vim.api.nvim_win_get_cursor(0)[1]
-			if not todo_at[lnum] then
-				return
-			end
-			local line = vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, false)[1]
-			vim.api.nvim_buf_set_extmark(buf, cursor_ns, lnum - 1, block[1], {
-				end_col = #line,
-				hl_group = 'HomepageSelected',
-				priority = 50,
-			})
-			if block[1] >= 2 then
-				vim.api.nvim_buf_set_extmark(buf, cursor_ns, lnum - 1, block[1] - 2, {
-					virt_text = { { icon.marker, 'HomepageMarker' } },
-					virt_text_pos = 'overlay',
-				})
-			end
-		end
-
-		if first then
-			vim.api.nvim_win_set_cursor(win, { first, text_col(first) })
-		end
-		highlight_selected()
-
-		vim.api.nvim_create_autocmd('CursorMoved', {
-			group = startup_group,
-			buffer = buf,
-			callback = highlight_selected,
-		})
-
-		-- keep it centered, and the cursor on the same todo
-		vim.api.nvim_create_autocmd({ 'VimResized', 'WinResized' }, {
-			group = startup_group,
-			callback = function()
-				if not vim.api.nvim_buf_is_valid(buf) then
-					return true
-				end
-				local shown = vim.fn.win_findbuf(buf)[1]
-				if not shown then
-					return
-				end
-				local selected = todo_at[vim.api.nvim_win_get_cursor(shown)[1]]
-				todo_at, first, block = render(buf, shown, list, todos)
-				for lnum, todo in pairs(todo_at) do
-					if todo == selected then
-						vim.api.nvim_win_set_cursor(shown, { lnum, text_col(lnum) })
-					end
-				end
-				vim.api.nvim_win_call(shown, highlight_selected)
-			end,
-		})
-
-		local map_opts = { silent = true, buffer = buf }
-
-		for _, action in ipairs(list) do
-			vim.keymap.set('n', action.key, action.run, map_opts)
-		end
-
-		vim.keymap.set('n', '<cr>', function()
-			local todo = todo_at[vim.api.nvim_win_get_cursor(0)[1]]
-			if todo then
-				vim.cmd.edit(vim.fn.fnameescape(todo.path))
-				vim.api.nvim_win_set_cursor(0, { todo.lnum, 0 })
-			end
-		end, map_opts)
-	end,
+	callback = draw_homepage
 })
+
+vim.keymap.set("n", "<leader>gH", draw_homepage, { silent = true })
