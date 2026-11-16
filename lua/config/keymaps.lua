@@ -61,11 +61,13 @@ vim.keymap.set('n', '<leader>pa', function()
 	print('file: ' .. path)
 end)
 
--- insert current date
+-- pick a date from a calendar and insert it
 vim.keymap.set('n', '<leader>td', function()
 	local diary = require('config.wikis').diary
-	vim.api.nvim_put({ diary:date_string() .. ' ' }, 'c', false, true)
-end, { desc = 'insert current date', silent = true })
+	require('config.datepicker').pick(function(time)
+		vim.api.nvim_put({ diary:date_string(time) .. ' ' }, 'c', false, true)
+	end)
+end, { desc = 'pick and insert a date', silent = true })
 
 -- terminal keymaps
 vim.keymap.set('t', '<esc>', '<C-\\><C-n>')
